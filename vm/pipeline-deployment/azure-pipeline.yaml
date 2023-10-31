@@ -1,0 +1,14 @@
+script:
+  - pipe: microsoft/azure-vm-linux-script-deploy:1.0.1
+    variables:
+      AZURE_APP_ID: $AZURE_APP_ID
+      AZURE_PASSWORD: $AZURE_PASSWORD
+      AZURE_TENANT_ID: $AZURE_TENANT_ID
+      AZURE_RESOURCE_GROUP: $AZURE_RESOURCE_GROUP
+      AZURE_VM_NAME: $AZURE_VM_NAME
+      AZURE_EXTENSION_COMMAND: './script.sh -p my-package.zip -n default -s kestrel.service'
+      AZURE_EXTENSION_FILES: 'custom-script/script.sh,my-package.zip,https://myresources/nginx/default,systemd/kestrel.service'
+      AZURE_FORCE_UPDATE: 'true'
+      AZURE_NO_WAIT: 'true'
+      AZURE_CLEANUP: 'true'
+      DEBUG: 'true'
