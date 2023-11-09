@@ -73,20 +73,22 @@ resource "azurerm_linux_virtual_machine" "main" {
   }
 
   provisioner "remote-exec" {
-    inline = [
-      "sudo apt update",
-      "sudo apt install -y git",
-      "sudo apt install -y apt-transport-https ca-certificates curl software-properties-common",
-      "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -",
-      "yes | sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\"",
-      "sudo apt update",
-      "sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin docker-compose",
-      "sudo usermod -aG docker $USER",
-      "mkdir -p app",
-      "cd app",
-      "git clone https://github.com/aminalali8/demo-books.git ./",
-      "sudo docker-compose up -d"
-    ]
+#    inline = [
+#      "sudo apt update",
+#      "sudo apt install -y git",
+#      "sudo apt install -y apt-transport-https ca-certificates curl software-properties-common",
+#      "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -",
+#      "yes | sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\"",
+#      "sudo apt update",
+#      "sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin docker-compose",
+#      "sudo usermod -aG docker $USER",
+#      "mkdir -p app",
+#      "cd app",
+#      "git clone https://github.com/aminalali8/demo-books.git ./",
+#      "sudo docker-compose up -d"
+#    ]
+#    script = "init_app.sh"
+    scripts = ["init_app.sh"]
 
     connection {
       host        = self.public_ip_address
