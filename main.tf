@@ -91,7 +91,7 @@ resource "azurerm_linux_virtual_machine" "main" {
     connection {
       host        = self.public_ip_address
       user        = self.admin_username
-      private_key = file("id_tf_rsa")
+      private_key = file("${var.private_key_file_name}")
     }
   }
 }
