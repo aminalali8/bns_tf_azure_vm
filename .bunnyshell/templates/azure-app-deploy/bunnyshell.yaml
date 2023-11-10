@@ -17,9 +17,35 @@ components:
     runnerImage: 'hashicorp/terraform:1.5'
     deploy:
       - '/bns/helpers/terraform/get_managed_backend > zz_backend_override.tf'
-      - 'ssh-keygen -t rsa -b 4096 -f "./id_rsa" -N ""'
-      - 'PRIV_KEY=$(cat id_rsa)'
-      - 'PUB_KEY=$(cat id_rsa.pub)'
+      - |
+        # Function to fix the formatting of the private key
+        fix_private_key_format() {
+            echo "$1" | sed 's/\\n/\n/g'
+        }
+
+        # Check if PRIV_KEY and PUB_KEY environment variables are set and not empty
+        if [ -n "$PRIV_KEY" ] && [ -n "$PUB_KEY" ]; then
+            echo "SSH keys found in environment variables. Creating key files."
+
+            # Fix formatting of private key and create file
+            fixed_priv_key=$(fix_private_key_format "$PRIV_KEY")
+            echo "$fixed_priv_key" > ./id_rsa
+
+            # Create public key file
+            echo "$PUB_KEY" > ./id_rsa.pub
+
+            # Set file permissions
+            chmod 600 ./id_rsa
+            chmod 644 ./id_rsa.pub
+        else
+            echo "SSH keys not found in environment variables. Generating new keys."
+            ssh-keygen -t rsa -b 4096 -f "./id_rsa" -N ""
+            PRIV_KEY=$(cat ./id_rsa)
+            PUB_KEY=$(cat ./id_rsa.pub)
+            # Optionally, export the keys as environment variables
+            export PRIV_KEY
+            export PUB_KEY
+        fi
       - |
         cat << EOF > variables.tfvars
           # Suffix for naming resources

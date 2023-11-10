@@ -18,6 +18,7 @@ variable "admin_user" {
 
 variable "public_key" {
   description = "Public key. This value is generated during deploy runtime and outputed into bunnyshell output"
+  default = "INPUT-PUBLIC-KEY-HERE"
 }
 
 variable "private_key_file_name" {
