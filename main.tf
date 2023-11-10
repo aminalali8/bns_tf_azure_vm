@@ -6,7 +6,7 @@ provider "azurerm" {
 }
 
 resource "azurerm_resource_group" "main" {
-  name     = "resources-amin-bns-${var.suffix}"
+  name     = "resources-amin-bns-${var.suffix}" // todo remove amin from the string value
   location = var.location
 }
 
@@ -29,8 +29,8 @@ resource "azurerm_public_ip" "main" {
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
   allocation_method   = "Static"
+  domain_name_label   = "bns-tf-${var.suffix}"
 }
-
 
 resource "azurerm_network_interface" "main" {
   name                = "nic-bns-${var.suffix}"
@@ -50,14 +50,14 @@ resource "azurerm_linux_virtual_machine" "main" {
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
   size                = "Standard_F2"
-  admin_username      = "${var.admin_user}"
+  admin_username      = var.admin_user
   network_interface_ids = [
     azurerm_network_interface.main.id,
   ]
 
   admin_ssh_key {
-    username   = "${var.admin_user}"
-    public_key = "${var.public_key}"
+    username   = var.admin_user
+    public_key = var.public_key
   }
 
   source_image_reference {
@@ -73,21 +73,11 @@ resource "azurerm_linux_virtual_machine" "main" {
   }
 
   provisioner "remote-exec" {
-#    inline = [
-#      "sudo apt update",
-#      "sudo apt install -y git",
-#      "sudo apt install -y apt-transport-https ca-certificates curl software-properties-common",
-#      "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -",
-#      "yes | sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\"",
-#      "sudo apt update",
-#      "sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin docker-compose",
-#      "sudo usermod -aG docker $USER",
-#      "mkdir -p app",
-#      "cd app",
-#      "git clone https://github.com/aminalali8/demo-books.git ./",
-#      "sudo docker-compose up -d"
-#    ]
-#    script = "init_app.sh"
+    #    inline = [
+    #      "sudo apt update",
+    #      "sudo apt install -y git",
+    #    ]
+    #    script = "init_app.sh"
     scripts = ["init_app.sh"]
 
     connection {

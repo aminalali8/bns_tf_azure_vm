@@ -2,12 +2,12 @@ kind: Environment
 name: VM-Deployment
 type: primary
 environmentVariables:
-  ARM_CLIENT_ID: '<<BNS_SECRET>>'
-  ARM_CLIENT_SECRET: '<<BNS_SECRET>>'
-  ARM_SUBSCRIPTION_ID: '<<BNS_SECRET>>'
-  ARM_TENANT_ID: '<<BNS_SECRET>>'
-  tf_admin_user: bns
-  tf_location: 'France Central'
+  ARM_CLIENT_ID: '<<INSERT YOUR VALUES HERE>>'
+  ARM_CLIENT_SECRET: '<<INSERT YOUR VALUES HERE>>'
+  ARM_SUBSCRIPTION_ID: '<<INSERT YOUR VALUES HERE>>'
+  ARM_TENANT_ID: '<<INSERT YOUR VALUES HERE>>'
+  tf_admin_user: bns # VM ADMIN USERNAME
+  tf_location: 'France Central' # SET THE LOCATION YOU WISH TO DEPLOY IN.
 components:
   - kind: Terraform
     name: terraform-azure-vm
