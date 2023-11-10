@@ -9,4 +9,4 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plu
 mkdir -p app
 cd app
 git clone https://github.com/aminalali8/demo-books.git ./
-sudo docker-compose up -
+sudo docker-compose up -d
