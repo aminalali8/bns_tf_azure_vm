@@ -6,7 +6,7 @@ provider "azurerm" {
 }
 
 resource "azurerm_resource_group" "main" {
-  name     = "resources-amin-bns-${var.suffix}" // todo remove amin from the string value
+  name     = "resources-bns-${var.suffix}"
   location = var.location
 }
 
