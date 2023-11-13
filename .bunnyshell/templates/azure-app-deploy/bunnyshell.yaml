@@ -1,13 +1,13 @@
 kind: Environment
-name: VM-Deployment
+name: 'Copy of Copy of VM-Deployment'
 type: primary
 environmentVariables:
-  ARM_CLIENT_ID: '<<REPLACE_WITH_YOUR_SECRET>>'
-  ARM_CLIENT_SECRET: '<<REPLACE_WITH_YOUR_SECRET>>'
-  ARM_SUBSCRIPTION_ID: '<<REPLACE_WITH_YOUR_SECRET>>'
-  ARM_TENANT_ID: '<<REPLACE_WITH_YOUR_SECRET>>'
-  tf_admin_user: bns # VM ADMIN USERNAME
-  tf_location: 'France Central' # SET THE LOCATION YOU WISH TO DEPLOY IN.
+  ARM_CLIENT_ID: '<<BNS_SECRET>>'
+  ARM_CLIENT_SECRET: '<<BNS_SECRET>>'
+  ARM_SUBSCRIPTION_ID: '<<BNS_SECRET>>'
+  ARM_TENANT_ID: '<<BNS_SECRET>>'
+  tf_admin_user: bns
+  tf_location: 'France Central'
 components:
   - kind: Terraform
     name: terraform-azure-vm
@@ -17,23 +17,24 @@ components:
     runnerImage: 'hashicorp/terraform:1.5'
     deploy:
       - '/bns/helpers/terraform/get_managed_backend > zz_backend_override.tf'
+      - ' echo "{{components.terraform-azure-vm.exported.PUB_KEY}}"'
       - |
         # Function to fix the formatting of the private key
         fix_private_key_format() {
             echo "$1" | sed 's/\\n/\n/g'
         }
-
         # Check if PRIV_KEY and PUB_KEY environment variables are set and not empty
-        if [ -n "$PRIV_KEY" ] && [ -n "$PUB_KEY" ]; then
+        if [ -n "{{components.terraform-azure-vm.exported.PUB_KEY}}" ] && [ -n "{{components.terraform-azure-vm.exported.PRIV_KEY}}" ]; then
             echo "SSH keys found in environment variables. Creating key files."
-
+            PUB_KEY = "{{components.terraform-azure-vm.exported.PUB_KEY}}"
+            PRIV_KEY = "{{components.terraform-azure-vm.exported.PRIV_KEY}}"
             # Fix formatting of private key and create file
             fixed_priv_key=$(fix_private_key_format "$PRIV_KEY")
             echo "$fixed_priv_key" > ./id_rsa
-
+        
             # Create public key file
             echo "$PUB_KEY" > ./id_rsa.pub
-
+        
             # Set file permissions
             chmod 600 ./id_rsa
             chmod 644 ./id_rsa.pub
@@ -42,9 +43,6 @@ components:
             ssh-keygen -t rsa -b 4096 -f "./id_rsa" -N ""
             PRIV_KEY=$(cat ./id_rsa)
             PUB_KEY=$(cat ./id_rsa.pub)
-            # Optionally, export the keys as environment variables
-            export PRIV_KEY
-            export PUB_KEY
         fi
       - |
         cat << EOF > variables.tfvars
@@ -66,7 +64,7 @@ components:
     destroy:
       - '/bns/helpers/terraform/get_managed_backend > zz_backend_override.tf'
       - 'terraform init -input=false -no-color'
-      - 'terraform destroy -var-file="variables.tfvars" -input=false -auto-approve -no-color'
+      - 'terraform destroy -input=false -auto-approve -no-color'
     exportVariables:
       - PRIV_KEY
       - PUB_KEY
