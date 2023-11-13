@@ -26,14 +26,12 @@ components:
         # Check if PRIV_KEY and PUB_KEY environment variables are set and not empty
         if [ -n "{{components.terraform-azure-vm.exported.PUB_KEY}}" ] && [ -n "{{components.terraform-azure-vm.exported.PRIV_KEY}}" ]; then
             echo "SSH keys found in environment variables. Creating key files."
-            PUB_KEY = "{{components.terraform-azure-vm.exported.PUB_KEY}}"
-            PRIV_KEY = "{{components.terraform-azure-vm.exported.PRIV_KEY}}"
             # Fix formatting of private key and create file
-            fixed_priv_key=$(fix_private_key_format "$PRIV_KEY")
+            fixed_priv_key=$(fix_private_key_format "{{components.terraform-azure-vm.exported.PRIV_KEY}}")
             echo "$fixed_priv_key" > ./id_rsa
         
             # Create public key file
-            echo "$PUB_KEY" > ./id_rsa.pub
+            echo "{{components.terraform-azure-vm.exported.PUB_KEY}}" > ./id_rsa.pub
         
             # Set file permissions
             chmod 600 ./id_rsa

@@ -46,11 +46,11 @@ resource "azurerm_network_interface" "main" {
 }
 
 resource "azurerm_linux_virtual_machine" "main" {
-  name                = "vm-bns-${var.suffix}"
-  resource_group_name = azurerm_resource_group.main.name
-  location            = azurerm_resource_group.main.location
-  size                = "Standard_F2"
-  admin_username      = var.admin_user
+  name                  = "vm-bns-${var.suffix}"
+  resource_group_name   = azurerm_resource_group.main.name
+  location              = azurerm_resource_group.main.location
+  size                  = "Standard_F2"
+  admin_username        = var.admin_user
   network_interface_ids = [
     azurerm_network_interface.main.id,
   ]
@@ -71,6 +71,12 @@ resource "azurerm_linux_virtual_machine" "main" {
     storage_account_type = "Standard_LRS"
     caching              = "ReadWrite"
   }
+}
+
+resource "null_resource" "example" {
+  triggers = {
+    always_run = timestamp()
+  }
 
   provisioner "remote-exec" {
     #    inline = [
@@ -78,12 +84,14 @@ resource "azurerm_linux_virtual_machine" "main" {
     #      "sudo apt install -y git",
     #    ]
     #    script = "init_app.sh"
+
     scripts = ["init_app.sh"]
 
     connection {
-      host        = self.public_ip_address
-      user        = self.admin_username
-      private_key = file("${var.private_key_file_name}")
+      type        = "ssh"
+      host        = azurerm_linux_virtual_machine.main.public_ip_address
+      user        = var.admin_user
+      private_key = file(var.private_key_file_name)
     }
   }
 }
