@@ -1,13 +1,11 @@
 kind: Environment
-name: VM-Deployment
+name: 'Copy of Copy of VM-Deployment'
 type: primary
 environmentVariables:
   ARM_CLIENT_ID: '<<BNS_SECRET>>'
   ARM_CLIENT_SECRET: '<<BNS_SECRET>>'
   ARM_SUBSCRIPTION_ID: '<<BNS_SECRET>>'
   ARM_TENANT_ID: '<<BNS_SECRET>>'
-  PRIV_KEY: ''
-  PUB_KEY: ''
   tf_admin_user: bns
   tf_location: 'France Central'
 components:
@@ -19,14 +17,14 @@ components:
     runnerImage: 'hashicorp/terraform:1.5'
     deploy:
       - '/bns/helpers/terraform/get_managed_backend > zz_backend_override.tf'
+      - ' echo "{{components.terraform-azure-vm.exported.PUB_KEY}}"'
       - |
         # Function to fix the formatting of the private key
         fix_private_key_format() {
             echo "$1" | sed 's/\\n/\n/g'
         }
-        
         # Check if PRIV_KEY and PUB_KEY environment variables are set and not empty
-        if [ -n "{{components.terraform_azure_vm.exported.PUB_KEY}}" ] && [ -n "{{components.terraform_azure_vm.exported.PRIV_KEY}}" ]; then
+        if [ -n "{{components.terraform-azure-vm.exported.PUB_KEY}}" ] && [ -n "{{components.terraform-azure-vm.exported.PRIV_KEY}}" ]; then
             echo "SSH keys found in environment variables. Creating key files."
             # Fix formatting of private key and create file
             fixed_priv_key=$(fix_private_key_format "{{components.terraform-azure-vm.exported.PRIV_KEY}}")
@@ -41,10 +39,10 @@ components:
         else
             echo "SSH keys not found in environment variables. Generating new keys."
             ssh-keygen -t rsa -b 4096 -f "./id_rsa" -N ""
+            PRIV_KEY=$(cat ./id_rsa)
+            PUB_KEY=$(cat ./id_rsa.pub)
         fi
       - |
-        PRIV_KEY=$(cat ./id_rsa)
-        PUB_KEY=$(cat ./id_rsa.pub)
         cat << EOF > variables.tfvars
           # Suffix for naming resources
           suffix = "{{ env.unique }}"
@@ -57,8 +55,8 @@ components:
           # File name for the private key
           private_key_file_name = "id_rsa"
         EOF
-      - 'terraform init -upgrade -input=false -no-color'
-      - 'terraform plan -var-file="variables.tfvars" -no-color -input=false'
+      - 'terraform init -input=false -no-color'
+      - 'terraform plan -var-file="variables.tfvars"'
       - 'terraform apply -var-file="variables.tfvars" -input=false -auto-approve -no-color'
       - 'BNS_TF_STATE_LIST=`terraform show -json`'
     destroy:

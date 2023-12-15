@@ -74,6 +74,7 @@ resource "azurerm_linux_virtual_machine" "main" {
 }
 
 resource "null_resource" "example" {
+
   triggers = {
     always_run = timestamp()
   }
